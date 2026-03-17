@@ -3,11 +3,22 @@ from orchestrator.orchestrator import route_query
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"status": "running"}
+memory = {}
 
 @app.get("/query")
-def query(q: str):
-    result = route_query(q)
-    return {"query": q, "response": result}
+def query(q: str, user_id: str = "demo_user"):
+    if user_id not in memory:
+        memory[user_id] = []
+
+    response = route_query(q)
+
+    memory[user_id].append({
+        "query": q,
+        "response": response
+    })
+
+    return {
+        "user_id": user_id,
+        "response": response,
+        "history": memory[user_id]
+    }
