@@ -1,4 +1,4 @@
-# Enterprise Agentic AI Platform (Architect-Level Demo)
+# Enterprise Agentic AI Platform (Demo)
 
 ## Overview
 This project demonstrates an enterprise-grade AI platform with:
