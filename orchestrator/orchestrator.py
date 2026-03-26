@@ -1,3 +1,9 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+
 from agents.qa_agent import qa_agent
 from agents.summary_agent import summary_agent
 

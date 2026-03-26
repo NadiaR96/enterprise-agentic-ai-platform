@@ -1,3 +1,28 @@
-.venv
-*.pyc
+# Node
+node_modules/
+npm-debug.log
+
+# Python
+venv/
 __pycache__/
+*.pyc
+
+# Environment / secrets
+.env
+*.env
+config.json
+secrets.json
+
+# React build
+frontend/build/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AI models
+models/
+*.pt
+*.bin
