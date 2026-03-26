@@ -1,25 +1,16 @@
 {
   "name": "enterprise-agentic-ai-platform",
   "version": "1.0.0",
-  "description": "## Overview This project demonstrates an enterprise-grade AI platform with: - Multi-agent orchestration - RAG pipeline - Observability & metrics - Cost tracking simulation - Scalable architecture design",
-  "main": "index.js",
- "scripts": {
-    "start:backend": "cd backend && python main.py",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && ..\\.venv\\Scripts\\pip.exe install -r requirements.txt",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "start:backend": "cd backend && ..\\.venv\\Scripts\\python.exe main.py",
     "start:frontend": "cd frontend && npx react-scripts start",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/NadiaR96/enterprise-agentic-ai-platform.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/NadiaR96/enterprise-agentic-ai-platform/issues"
-  },
-  "homepage": "https://github.com/NadiaR96/enterprise-agentic-ai-platform#readme",
   "devDependencies": {
-    "concurrently": "^7.6.0"
+    "concurrently": "^8.2.0"
   }
 }
