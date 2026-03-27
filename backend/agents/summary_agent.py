@@ -1,2 +1,4 @@
-def summary_agent(query):
-    return f"Summary of: {query}"
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You summarize answers concisely."),
+    ("human", "Summarize:\n{answers}")
+])

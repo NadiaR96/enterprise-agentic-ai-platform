@@ -1,2 +1,10 @@
 fastapi
 uvicorn
+langchain==0.1.0
+langchain-community==0.0.20
+langchain-openai==0.0.5
+faiss-cpu
+tiktoken
+pypdf
+python-docx
+dotenv

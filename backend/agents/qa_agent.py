@@ -1,10 +1,27 @@
-import sys
-import os
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from ..retriever.vector_retriever import retrieve
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+llm = ChatOpenAI(temperature=0)
 
+# Normal prompt
+qa_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer ONLY using provided documents."),
+    ("human", "Documents:\n{docs}\n\nQuestion: {query}")
+])
 
-from rag.pipeline import generate_answer
+# Retry prompt (stricter)
+retry_prompt = ChatPromptTemplate.from_messages([
+    ("system", "You previously gave an incorrect or ungrounded answer. ONLY use the documents. If unsure, say 'I don't know'."),
+    ("human", "Documents:\n{docs}\n\nQuestion: {query}")
+])
 
-def qa_agent(query):
-    return generate_answer(query)
+def run_qa(query: str, user_id: str = None, retry=False):
+    docs = retrieve(query, user_id)
+    doc_text = "\n".join([d.page_content for d in docs])
+
+    prompt = retry_prompt if retry else qa_prompt
+
+    response = llm.invoke(prompt.format_messages(query=query, docs=doc_text))
+
+    return response.content, doc_text
