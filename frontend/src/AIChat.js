@@ -3,22 +3,136 @@ import { useState, useEffect } from "react";
 export default function AIChat() {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState([]);
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || "alice");
-  const [newUser, setNewUser] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [users, setUsers] = useState([]);
 
-  // Fetch history when user changes
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [user, setUser] = useState(null);
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({ username: "", password: "", email: "" });
+  const [showRegister, setShowRegister] = useState(false);
+
+  // Check authentication on mount
   useEffect(() => {
-    fetchHistory(userId);
-    fetchUsers();
-  }, [userId]);
+    if (token) {
+      validateToken();
+    }
+  }, []);
+
+  // Fetch user history when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchHistory();
+    }
+  }, [isAuthenticated, user]);
+
+  const validateToken = async () => {
+    try {
+      console.debug("validateToken token:", token);
+      const headers = { Authorization: `Bearer ${token}` };
+      console.debug("validateToken headers:", headers);
+      const res = await fetch("http://127.0.0.1:8000/auth/me", {
+        headers
+      });
+      if (res.ok) {
+        const userData = await res.json();
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        console.warn("validateToken failed with status", res.status);
+        logout();
+      }
+    } catch (err) {
+      console.error("validateToken error", err);
+      logout();
+    }
+  };
+
+  const login = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("username", loginForm.username);
+      formData.append("password", loginForm.password);
+
+      const res = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const accessToken = data.access_token;
+        
+        // Save token first
+        localStorage.setItem("token", accessToken);
+        setToken(accessToken);
+        setLoginForm({ username: "", password: "" });
+        
+        // Validate token with the actual token value (not state)
+        try {
+          const headers = { Authorization: `Bearer ${accessToken}` };
+          const meRes = await fetch("http://127.0.0.1:8000/auth/me", {
+            headers
+          });
+          if (meRes.ok) {
+            const userData = await meRes.json();
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            console.warn("validateToken failed with status", meRes.status);
+            setError("Failed to validate token");
+            logout();
+          }
+        } catch (err) {
+          console.error("validateToken error", err);
+          setError("Failed to validate token");
+          logout();
+        }
+      } else {
+        setError("Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login failed");
+    }
+  };
+
+  const register = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerForm)
+      });
+
+      if (res.ok) {
+        setError("Registration successful! Please login.");
+        setShowRegister(false);
+        setRegisterForm({ username: "", password: "", email: "" });
+      } else {
+        setError("Registration failed");
+      }
+    } catch (err) {
+      setError("Registration failed");
+    }
+  };
+
+  const logout = () => {
+    setToken("");
+    setUser(null);
+    setIsAuthenticated(false);
+    setHistory([]);
+    localStorage.removeItem("token");
+  };
 
   // Fetch user history from backend
-  const fetchHistory = async (uid) => {
+  const fetchHistory = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/history/${uid}`);
+      const res = await fetch("http://127.0.0.1:8000/api/history", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (res.ok) {
         const data = await res.json();
         setHistory(data.history || []);
@@ -28,30 +142,20 @@ export default function AIChat() {
     }
   };
 
-  // Fetch all users
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:8000/users");
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.users || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-    }
-  };
-
   // Send query to backend
   const sendQuery = async () => {
-    if (!query) return;
+    if (!query || !isAuthenticated) return;
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/query", {
+      const res = await fetch("http://127.0.0.1:8000/api/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query, user_id: userId }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ query: query }),
       });
 
       if (!res.ok) {
@@ -59,7 +163,12 @@ export default function AIChat() {
       }
 
       const data = await res.json();
-      setHistory([...history, { query, response: data.answer, confidence: data.confidence, created_at: new Date().toISOString() }]);
+      setHistory([...history, {
+        query,
+        response: data.response.answer,
+        confidence: data.response.confidence,
+        created_at: new Date().toISOString()
+      }]);
       setQuery("");
     } catch (err) {
       console.error(err);
@@ -69,27 +178,74 @@ export default function AIChat() {
     }
   };
 
-  // Switch to existing user or create new
-  const switchUser = () => {
-    if (!newUser) return;
-    localStorage.setItem("userId", newUser);
-    setUserId(newUser);
-    setNewUser("");
-  };
+  if (!isAuthenticated) {
+    return (
+      <div style={{ padding: "20px", fontFamily: "Arial", maxWidth: "400px", margin: "0 auto" }}>
+        <h2>Enterprise AI Platform</h2>
+
+        {showRegister ? (
+          <div>
+            <h3>Register</h3>
+            <input
+              type="text"
+              placeholder="Username"
+              value={registerForm.username}
+              onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
+              style={{ display: "block", margin: "10px 0", width: "100%" }}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={registerForm.email}
+              onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+              style={{ display: "block", margin: "10px 0", width: "100%" }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={registerForm.password}
+              onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+              style={{ display: "block", margin: "10px 0", width: "100%" }}
+            />
+            <button onClick={register} style={{ marginRight: "10px" }}>Register</button>
+            <button onClick={() => setShowRegister(false)}>Back to Login</button>
+          </div>
+        ) : (
+          <div>
+            <h3>Login</h3>
+            <input
+              type="text"
+              placeholder="Username"
+              value={loginForm.username}
+              onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+              style={{ display: "block", margin: "10px 0", width: "100%" }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginForm.password}
+              onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+              style={{ display: "block", margin: "10px 0", width: "100%" }}
+            />
+            <button onClick={login} style={{ marginRight: "10px" }}>Login</button>
+            <button onClick={() => setShowRegister(true)}>Register</button>
+            <p style={{ fontSize: "12px", marginTop: "10px", color: "#666" }}>
+              Demo accounts: admin/admin, user1/password
+            </p>
+          </div>
+        )}
+
+        {error && <div style={{ color: "red", marginTop: "10px" }}>{error}</div>}
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial", display: "flex", gap: "20px" }}>
       <div style={{ flex: 1 }}>
-        <h2>AI Chat - User: {userId}</h2>
-
-        {/* Switch User */}
-        <div style={{ marginBottom: "10px" }}>
-          <input
-            placeholder="Switch user"
-            value={newUser}
-            onChange={(e) => setNewUser(e.target.value)}
-          />
-          <button onClick={switchUser}>Switch</button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <h2>AI Chat - User: {user?.user_id} ({user?.roles?.join(", ")})</h2>
+          <button onClick={logout} style={{ padding: "5px 10px" }}>Logout</button>
         </div>
 
         {/* Query Input */}
@@ -131,43 +287,6 @@ export default function AIChat() {
             <div>No messages yet</div>
           )}
         </div>
-      </div>
-
-      {/* User List Sidebar */}
-      <div
-        style={{
-          width: "150px",
-          border: "1px solid #ddd",
-          padding: "10px",
-          borderRadius: "4px",
-          maxHeight: "500px",
-          overflowY: "auto",
-        }}
-      >
-        <h3>Users</h3>
-        {users.length > 0 ? (
-          users.map((u) => (
-            <div
-              key={u}
-              onClick={() => {
-                localStorage.setItem("userId", u);
-                setUserId(u);
-              }}
-              style={{
-                padding: "8px",
-                marginBottom: "4px",
-                backgroundColor: u === userId ? "#007bff" : "#f0f0f0",
-                color: u === userId ? "white" : "black",
-                cursor: "pointer",
-                borderRadius: "4px",
-              }}
-            >
-              {u}
-            </div>
-          ))
-        ) : (
-          <div>No users yet</div>
-        )}
       </div>
     </div>
   );

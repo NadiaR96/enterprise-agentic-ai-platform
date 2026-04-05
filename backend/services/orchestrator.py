@@ -1,12 +1,12 @@
 # orchestrator.py
 try:
     from backend.agents.planner_agent import planner_agent
-    from backend.agents.qa_agent import answer as qa_agent
+    from backend.agents.qa_agent import qa_agent
     from backend.agents.summary_agent import summary_agent
     from backend.agents.evaluator_agent import evaluator_agent
 except ModuleNotFoundError:
     from agents.planner_agent import planner_agent
-    from agents.qa_agent import answer as qa_agent
+    from agents.qa_agent import qa_agent
     from agents.summary_agent import summary_agent
     from agents.evaluator_agent import evaluator_agent
 

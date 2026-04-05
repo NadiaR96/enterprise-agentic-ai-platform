@@ -19,6 +19,7 @@ load_dotenv()  # Load environment variables from .env file
 print(f"OPENAI_API_KEY loaded: {'Yes' if os.getenv('OPENAI_API_KEY') else 'No'}")
 
 from api.routes import router  # Make sure this imports your endpoints
+from auth.routes import router as auth_router  # Authentication routes
 
 app = FastAPI(
     title="Enterprise Agentic AI Platform",
@@ -43,7 +44,8 @@ app.add_middleware(
 )
 
 # === API Routes ===
-app.include_router(router)
+app.include_router(router, prefix="/api", tags=["API"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
 # === Root Endpoint (Optional) ===
 @app.get("/")
