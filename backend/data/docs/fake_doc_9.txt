@@ -1,0 +1,5 @@
+We can simulate realistic documents with fake text. Natural language processing is fascinating. This is a paragraph of text to make the KB feel real. Python 3.11 has improved performance for modern apps.
+
+Artificial intelligence is transforming the world. Artificial intelligence is transforming the world. OpenAI embeddings can convert text into vectors. Artificial intelligence is transforming the world.
+
+Natural language processing is fascinating. OpenAI embeddings can convert text into vectors. Generating synthetic data is useful for testing. FAISS allows fast similarity searches over embeddings.

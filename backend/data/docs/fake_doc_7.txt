@@ -1,0 +1,13 @@
+OpenAI embeddings can convert text into vectors. OpenAI embeddings can convert text into vectors. OpenAI embeddings can convert text into vectors. LangChain makes working with LLMs much easier.
+
+We can simulate realistic documents with fake text. Artificial intelligence is transforming the world. Generating synthetic data is useful for testing. Artificial intelligence is transforming the world.
+
+Python 3.11 has improved performance for modern apps. This is a paragraph of text to make the KB feel real. Vector databases are key for semantic search. Natural language processing is fascinating.
+
+OpenAI embeddings can convert text into vectors. We can simulate realistic documents with fake text. Python 3.11 has improved performance for modern apps. Vector databases are key for semantic search.
+
+Python 3.11 has improved performance for modern apps. OpenAI embeddings can convert text into vectors. OpenAI embeddings can convert text into vectors. Artificial intelligence is transforming the world.
+
+Vector databases are key for semantic search. We can simulate realistic documents with fake text. FAISS allows fast similarity searches over embeddings. FAISS allows fast similarity searches over embeddings.
+
+OpenAI embeddings can convert text into vectors. Python 3.11 has improved performance for modern apps. FAISS allows fast similarity searches over embeddings. This is a paragraph of text to make the KB feel real.

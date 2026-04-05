@@ -1,91 +1,58 @@
+# backend/main.py
+import os
+import sys
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Ensure backend package imports work whether this file is run as a script or a module.
+ROOT = Path(__file__).resolve().parent
+ROOT_PARENT = ROOT.parent
+for path in (str(ROOT), str(ROOT_PARENT)):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
 from dotenv import load_dotenv
-import os
+load_dotenv()  # Load environment variables from .env file
 
-load_dotenv(dotenv_path=".env")
+# Debug: Check if OPENAI_API_KEY is loaded
+print(f"OPENAI_API_KEY loaded: {'Yes' if os.getenv('OPENAI_API_KEY') else 'No'}")
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-COST_THRESHOLD = float(os.getenv("COST_THRESHOLD", 10))
-CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", 0.7))
+from api.routes import router  # Make sure this imports your endpoints
 
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY not set in .env")
-
-from agents.qa_agent import answer_question
-from agents.summary_agent import summarize_docs
-from agents.planner_agent import plan_query
-from agents.evaluator_agent import evaluate_response
-from rag.pipeline import retrieve, detect_hallucination
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"]
+app = FastAPI(
+    title="Enterprise Agentic AI Platform",
+    description="Backend API for your AI platform",
+    version="1.0.0",
 )
 
-# Multi-user memory with logs
-memory = {}
+# === CORS Setup ===
+# Add your frontend URLs here. For development, you can use localhost:3000
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # Add your production frontend domain here, e.g., "https://myapp.com"
+]
 
-@app.get("/query")
-def query(q: str, user_id: str = "demo_user"):
-    if user_id not in memory:
-        memory[user_id] = []
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Handles GET, POST, OPTIONS, etc.
+    allow_headers=["*"],
+)
 
-    # Planner decides which agents to use
-    agents_to_use = plan_query(q)
+# === API Routes ===
+app.include_router(router)
 
-    # Retrieve top documents
-    docs = retrieve(q, top_k=3)
+# === Root Endpoint (Optional) ===
+@app.get("/")
+async def root():
+    return {"message": "Enterprise Agentic AI Platform Backend is running."}
 
-    responses = []
-    logs = {
-        "planner": agents_to_use,
-        "retrieved_docs": docs,
-        "cost": 0,
-        "agent_confidences": {}
-    }
+# === Run with: uvicorn main:app --reload ===
 
-    # Execute agents with cost & confidence checks
-    for agent_name in agents_to_use:
-        if logs["cost"] > COST_THRESHOLD:
-            logs[f"{agent_name}_skipped"] = "Cost threshold reached"
-            continue
+if __name__ == "__main__":
+    import uvicorn
 
-        if agent_name == "qa":
-            resp, cost, confidence = answer_question(q)
-        elif agent_name == "summary":
-            resp, cost, confidence = summarize_docs(docs)
-        else:
-            continue
-
-        logs["cost"] += cost
-        logs["agent_confidences"][agent_name] = confidence
-
-        if confidence < CONFIDENCE_THRESHOLD:
-            logs[f"{agent_name}_skipped"] = "Confidence too low"
-            continue
-
-        responses.append(resp)
-        logs[agent_name] = resp
-
-    combined_response = " | ".join(responses)
-
-    # Evaluate final response for hallucinations
-    if detect_hallucination(combined_response, docs):
-        combined_response = evaluate_response(combined_response, docs)
-        logs["evaluation"] = combined_response
-
-    memory[user_id].append({
-        "query": q,
-        "response": combined_response,
-        "logs": logs
-    })
-
-    return {
-        "user_id": user_id,
-        "response": combined_response,
-        "history": memory[user_id]
-    }
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)

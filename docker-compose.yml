@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: enterprise-ai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend:/app
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: enterprise-ai-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ai-network
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=http://backend:8000
+
+networks:
+  ai-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+    driver: local

@@ -1,13 +1,15 @@
+# Chat models
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
 
-llm = ChatOpenAI(temperature=0)
+# Prompt templates
+from langchain_core.prompts import ChatPromptTemplate
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a planner deciding how to process a user query."),
-    ("human", "Query: {query}\n\nDecide: should we retrieve documents and answer, or just summarize?")
-])
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-def run_planner(query: str):
-    response = llm.invoke(prompt.format_messages(query=query))
-    return response.content.lower()
+prompt = ChatPromptTemplate.from_template(
+    "Decide the best action for this query: {query}"
+)
+
+def planner_agent(query: str):
+    chain = prompt | llm
+    return chain.invoke({"query": query})

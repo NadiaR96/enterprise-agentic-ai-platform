@@ -1,0 +1,7 @@
+FAISS allows fast similarity searches over embeddings. Vector databases are key for semantic search. Natural language processing is fascinating. Generating synthetic data is useful for testing.
+
+Generating synthetic data is useful for testing. LangChain makes working with LLMs much easier. We can simulate realistic documents with fake text. LangChain makes working with LLMs much easier.
+
+LangChain makes working with LLMs much easier. Generating synthetic data is useful for testing. FAISS allows fast similarity searches over embeddings. FAISS allows fast similarity searches over embeddings.
+
+Vector databases are key for semantic search. Artificial intelligence is transforming the world. LangChain makes working with LLMs much easier. Vector databases are key for semantic search.

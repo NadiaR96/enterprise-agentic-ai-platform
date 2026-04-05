@@ -1,0 +1,7 @@
+Artificial intelligence is transforming the world. Vector databases are key for semantic search. FAISS allows fast similarity searches over embeddings. Vector databases are key for semantic search.
+
+Generating synthetic data is useful for testing. Vector databases are key for semantic search. FAISS allows fast similarity searches over embeddings. Natural language processing is fascinating.
+
+Generating synthetic data is useful for testing. Generating synthetic data is useful for testing. OpenAI embeddings can convert text into vectors. We can simulate realistic documents with fake text.
+
+This is a paragraph of text to make the KB feel real. LangChain makes working with LLMs much easier. Artificial intelligence is transforming the world. We can simulate realistic documents with fake text.

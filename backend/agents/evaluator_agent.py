@@ -1,13 +1,17 @@
+# agents/evaluator_agent.py
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a strict evaluator checking if an answer is grounded in provided documents."),
-    ("human", "Documents:\n{docs}\n\nAnswer:\n{answer}\n\nIs the answer supported? Reply YES or NO.")
+    ("system", "Evaluate if the answer is supported by the documents."),
+    ("human", """Documents:\n{docs}\nAnswer:\n{answer}\nReturn a number between 0 (not supported) and 1 (fully supported).""")
 ])
 
-def run_evaluator(answer: str, docs: str):
+def evaluator_agent(answer: str, docs: str) -> float:
     response = llm.invoke(prompt.format_messages(answer=answer, docs=docs))
-    return "yes" in response.content.lower()
+    try:
+        return float(response.content.strip())
+    except:
+        return 0.0

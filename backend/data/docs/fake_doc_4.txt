@@ -1,0 +1,13 @@
+This is a paragraph of text to make the KB feel real. LangChain makes working with LLMs much easier. Generating synthetic data is useful for testing. FAISS allows fast similarity searches over embeddings.
+
+FAISS allows fast similarity searches over embeddings. LangChain makes working with LLMs much easier. Generating synthetic data is useful for testing. OpenAI embeddings can convert text into vectors.
+
+Vector databases are key for semantic search. Python 3.11 has improved performance for modern apps. FAISS allows fast similarity searches over embeddings. LangChain makes working with LLMs much easier.
+
+Natural language processing is fascinating. FAISS allows fast similarity searches over embeddings. Natural language processing is fascinating. OpenAI embeddings can convert text into vectors.
+
+Vector databases are key for semantic search. Artificial intelligence is transforming the world. Natural language processing is fascinating. Natural language processing is fascinating.
+
+Artificial intelligence is transforming the world. OpenAI embeddings can convert text into vectors. Natural language processing is fascinating. FAISS allows fast similarity searches over embeddings.
+
+Natural language processing is fascinating. Python 3.11 has improved performance for modern apps. OpenAI embeddings can convert text into vectors. Generating synthetic data is useful for testing.

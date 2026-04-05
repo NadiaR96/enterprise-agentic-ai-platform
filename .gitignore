@@ -27,3 +27,15 @@ Thumbs.db
 models/
 *.pt
 *.bin
+
+# Database files
+*.db
+
+# FAISS indices
+*.faiss
+
+# Environment overrides
+.env.local
+
+# Temporary files
+*.tmp
